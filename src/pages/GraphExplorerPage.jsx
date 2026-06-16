@@ -5,6 +5,7 @@ import '@xyflow/react/dist/style.css'
 import useAppStore from '../store/useAppStore'
 import { computeArbitrageOpportunities } from '../lib/algorithms'
 import { Button, Badge, Card, T } from '../components/ui'
+import { Icons } from '../components/layout'
 
 // Custom node component for graph explorer
 function GraphNode({ data }) {
@@ -20,7 +21,7 @@ function GraphNode({ data }) {
       cursor: 'grab',
       transition: 'all 0.3s',
     }}>
-      <span style={{ fontSize: 18 }}>{icon}</span>
+      <span style={{ fontSize: 16, fontWeight: 700, color, fontFamily: 'JetBrains Mono' }}>{icon}</span>
       <span style={{ fontSize: 10, fontWeight: 800, color: isArb ? color : T.text, fontFamily: 'JetBrains Mono' }}>{label}</span>
       <span style={{ fontSize: 8, color: T.muted }}>{pathCount}p</span>
     </div>
@@ -32,7 +33,7 @@ const nodeTypes = { graph: GraphNode }
 function buildGraphNodes(units, rates, unitMeta, arbUnits) {
   const n = units.length
   return units.map((u, i) => {
-    const meta = unitMeta[u] || { icon: '🔷', color: T.accent, category: 'Custom' }
+    const meta = unitMeta[u] || { icon: '•', color: T.accent, category: 'Custom' }
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2
     const r = Math.min(260, Math.max(180, n * 32))
     const pathCount = Object.values(rates[u] || {}).filter(Boolean).length
@@ -60,9 +61,9 @@ function buildGraphEdges(units, rates, arbPairs, filter) {
       id: key, source: from, target: to, type: 'smoothstep',
       animated: isArb,
       label: isArb ? `×${rate.toFixed(4)}` : '',
-      style: { stroke: isArb ? T.profit : 'rgba(255,255,255,0.12)', strokeWidth: isArb ? 2.5 : 1, opacity: isArb ? 1 : 0.5 },
+      style: { stroke: isArb ? T.profit : 'rgba(15,23,42,0.15)', strokeWidth: isArb ? 2.5 : 1, opacity: isArb ? 1 : 0.6 },
       labelStyle: { fill: T.profit, fontSize: 9, fontFamily: 'JetBrains Mono' },
-      markerEnd: { type: 'arrowclosed', color: isArb ? T.profit : 'rgba(255,255,255,0.2)' },
+      markerEnd: { type: 'arrowclosed', color: isArb ? T.profit : 'rgba(15,23,42,0.3)' },
     })
   }
   return edges
@@ -131,7 +132,7 @@ export default function GraphExplorerPage() {
         </div>
         <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
           <span><span style={{ color: T.profit }}>━ </span>Arbitrage path</span>
-          <span><span style={{ color: 'rgba(255,255,255,0.2)' }}>━ </span>Conversion</span>
+          <span><span style={{ color: 'rgba(15,23,42,0.3)' }}>━ </span>Conversion</span>
         </div>
       </div>
 
@@ -150,7 +151,7 @@ export default function GraphExplorerPage() {
           <Controls />
           <MiniMap
             nodeColor={n => n.data?.color || T.accent}
-            maskColor="rgba(7,11,20,0.85)"
+            maskColor="rgba(244,246,251,0.6)"
             style={{ background: T.card, border: `1px solid ${T.border}` }}
           />
           <Panel position="top-right" style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: '10px 14px', fontSize: 11, color: T.muted }}>
@@ -162,7 +163,7 @@ export default function GraphExplorerPage() {
       {/* Legend: units */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {filteredUnits.map(u => {
-          const meta = unitMeta[u] || { icon: '🔷', color: T.accent, category: 'Custom' }
+          const meta = unitMeta[u] || { icon: '•', color: T.accent, category: 'Custom' }
           const isArb = arbUnits.has(u)
           return (
             <div key={u} style={{
@@ -171,10 +172,10 @@ export default function GraphExplorerPage() {
               borderRadius: 20, fontSize: 11,
               boxShadow: isArb ? `0 0 8px ${meta.color}25` : 'none',
             }}>
-              <span>{meta.icon}</span>
+              <span style={{ color: meta.color, fontWeight: 700, fontFamily: 'JetBrains Mono' }}>{meta.icon}</span>
               <span style={{ fontWeight: 700, color: meta.color }}>{u}</span>
               <span style={{ color: T.muted }}>{meta.category}</span>
-              {isArb && <span style={{ color: T.profit, fontSize: 9 }}>⚡</span>}
+              {isArb && <span style={{ color: T.profit, display: 'flex' }}><Icons.Zap /></span>}
             </div>
           )
         })}

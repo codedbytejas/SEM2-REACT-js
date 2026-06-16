@@ -13,9 +13,9 @@ export const DEFAULT_RATES = {
 }
 
 export const DEFAULT_UNIT_META = {
-  USD: { icon: '💵', color: '#22C55E', category: 'Fiat',   description: 'US Dollar' },
-  EUR: { icon: '💶', color: '#3B82F6', category: 'Fiat',   description: 'Euro' },
-  GBP: { icon: '💷', color: '#8B5CF6', category: 'Fiat',   description: 'British Pound' },
+  USD: { icon: '$', color: '#16A34A', category: 'Fiat',   description: 'US Dollar' },
+  EUR: { icon: '€', color: '#2563EB', category: 'Fiat',   description: 'Euro' },
+  GBP: { icon: '£', color: '#7C3AED', category: 'Fiat',   description: 'British Pound' },
   BTC: { icon: '₿',  color: '#F59E0B', category: 'Crypto', description: 'Bitcoin' },
   ETH: { icon: 'Ξ',  color: '#06B6D4', category: 'Crypto', description: 'Ethereum' },
   JPY: { icon: '¥',  color: '#EC4899', category: 'Fiat',   description: 'Japanese Yen' },

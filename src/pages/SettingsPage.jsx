@@ -139,14 +139,14 @@ export default function SettingsPage() {
         <SettingRow
           label="Export Workspace"
           sub="Download full workspace as JSON (units, rates, meta, fees)"
-          control={<Button variant="ghost" size="sm" onClick={exportWorkspace}>⬇ Export JSON</Button>}
+          control={<Button variant="ghost" size="sm" onClick={exportWorkspace}>Export JSON</Button>}
         />
         <SettingRow
           label="Import Workspace"
           sub="Restore from a previously exported JSON file"
           control={
             <>
-              <Button variant="ghost" size="sm" onClick={() => fileRef.current.click()}>⬆ Import JSON</Button>
+              <Button variant="ghost" size="sm" onClick={() => fileRef.current.click()}>Import JSON</Button>
               <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
             </>
           }

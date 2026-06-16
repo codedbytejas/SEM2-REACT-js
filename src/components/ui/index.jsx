@@ -3,11 +3,32 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
 export const T = {
-  bg: '#070B14', surface: '#0F172A', card: '#111827',
-  border: 'rgba(255,255,255,0.08)',
-  profit: '#00E676', loss: '#FF5252', accent: '#3B82F6',
-  warning: '#F59E0B', purple: '#8B5CF6', cyan: '#06B6D4',
-  text: '#F8FAFC', muted: '#64748B', pink: '#EC4899',
+  bg: '#F4F6FB', surface: '#EEF2F8', card: '#FFFFFF',
+  border: 'rgba(15,23,42,0.10)',
+  profit: '#059669', loss: '#DC2626', accent: '#2563EB',
+  warning: '#D97706', purple: '#7C3AED', cyan: '#0891B2',
+  text: '#0F172A', muted: '#64748B', pink: '#DB2777',
+}
+
+// Soft elevation shadows for the light theme
+export const SHADOW    = '0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04)'
+export const SHADOW_LG = '0 12px 32px rgba(15,23,42,0.12)'
+
+// Shared brand gradient (matches sidebar / header)
+export const GRADIENT = 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)'
+
+// ─── Section title (colored bar + optional icon chip) ──────────────────────────
+export function SectionTitle({ color = '#2563EB', icon, children, action, style }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 18, ...style }}>
+      <span style={{ width: 4, height: 18, borderRadius: 2, background: color }} />
+      {icon && (
+        <span style={{ width: 30, height: 30, borderRadius: 9, background: `${color}16`, color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</span>
+      )}
+      <span style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>{children}</span>
+      {action && <div style={{ marginLeft: 'auto' }}>{action}</div>}
+    </div>
+  )
 }
 
 // ─── Animated number counter ──────────────────────────────────────────────────
@@ -37,7 +58,7 @@ export function StatCard({ label, value, sub, color = T.accent, icon, pulse }) {
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       style={{
         background: T.card, border: `1px solid ${color}22`, borderRadius: 12, padding: 20,
-        boxShadow: pulse ? `0 0 24px ${color}18` : 'none',
+        boxShadow: pulse ? `0 8px 24px ${color}22` : SHADOW,
         animation: pulse ? 'pulse-glow-blue 2.5s infinite' : 'none',
       }}
       whileHover={{ borderColor: `${color}55`, y: -2, transition: { duration: 0.15 } }}
@@ -91,7 +112,7 @@ export function StatusBadge({ status }) {
 export function Button({ children, variant = 'ghost', onClick, disabled, style, size = 'md' }) {
   const styles = {
     primary: { background: T.accent, color: '#fff', border: 'none' },
-    ghost:   { background: 'rgba(255,255,255,0.05)', color: T.text, border: `1px solid ${T.border}` },
+    ghost:   { background: 'rgba(15,23,42,0.04)', color: T.text, border: `1px solid ${T.border}` },
     danger:  { background: `${T.loss}18`, color: T.loss, border: `1px solid ${T.loss}35` },
     success: { background: `${T.profit}18`, color: T.profit, border: `1px solid ${T.profit}35` },
     accent:  { background: `${T.accent}18`, color: T.accent, border: `1px solid ${T.accent}35` },
@@ -155,7 +176,7 @@ export function Card({ children, style, hover = true, glowColor }) {
     <motion.div
       style={{
         background: T.card, border: `1px solid ${glowColor ? `${glowColor}30` : T.border}`,
-        borderRadius: 12, padding: 20, boxShadow: glowColor ? `0 0 20px ${glowColor}12` : 'none',
+        borderRadius: 12, padding: 20, boxShadow: glowColor ? `0 8px 28px ${glowColor}1f` : SHADOW,
         ...style,
       }}
       whileHover={hover ? { borderColor: glowColor ? `${glowColor}60` : 'rgba(59,130,246,0.25)', y: -1, transition: { duration: 0.15 } } : {}}
@@ -192,7 +213,7 @@ export function NotificationToast({ notifications, onDismiss }) {
             style={{
               background: T.card, border: `1px solid ${colorMap[n.type] || T.accent}40`,
               borderRadius: 10, padding: '10px 14px', minWidth: 240, maxWidth: 320,
-              boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px ${colorMap[n.type] || T.accent}20`,
+              boxShadow: `0 10px 30px rgba(15,23,42,0.15), 0 0 0 1px ${colorMap[n.type] || T.accent}20`,
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
             onClick={() => onDismiss(n.id)}
@@ -220,18 +241,20 @@ export function Modal({ open, onClose, title, children, width = 440 }) {
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
         onClick={onClose}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
           onClick={e => e.stopPropagation()}
-          style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 24, width, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto' }}
+          style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: 24, width, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto', boxShadow: SHADOW_LG }}
         >
           {title && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700 }}>{title}</h3>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', fontSize: 18 }}>✕</button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', display: 'flex', padding: 2 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+              </button>
             </div>
           )}
           {children}
@@ -245,7 +268,7 @@ export function Modal({ open, onClose, title, children, width = 440 }) {
 export function ProgressBar({ value, max = 100, color = T.accent, height = 6 }) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100))
   return (
-    <div style={{ height, background: 'rgba(255,255,255,0.06)', borderRadius: height }}>
+    <div style={{ height, background: 'rgba(15,23,42,0.08)', borderRadius: height }}>
       <motion.div
         initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, ease: 'easeOut' }}
         style={{ height: '100%', background: color, borderRadius: height }}

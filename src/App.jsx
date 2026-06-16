@@ -33,7 +33,7 @@ export default function App() {
   const PageComponent = PAGE_MAP[activePage] || DashboardPage
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#070B14' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#F4F6FB' }}>
       <Sidebar opportunities={opportunities.length} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
         <TickerTape />

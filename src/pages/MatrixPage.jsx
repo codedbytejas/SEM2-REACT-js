@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
 import { buildMatrix, heatColor, fmt } from '../lib/algorithms'
-import { Button, Card, Input, T } from '../components/ui'
+import { Button, Card, Input, SHADOW, T } from '../components/ui'
 
 export default function MatrixPage() {
   const { units, rates, unitMeta, setRate, removeRate, exportWorkspace } = useAppStore()
@@ -75,47 +75,53 @@ export default function MatrixPage() {
     a.download = 'arb_matrix.json'; a.click()
   }
 
+  const headBg = '#F1F4FB'
+  const totalRates = Object.values(rates).flatMap(Object.values).filter(Boolean).length
+
   return (
     <div style={{ padding: 24 }}>
       {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 18, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, padding: '7px 13px', flex: '0 0 220px' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: '8px 14px', flex: '0 0 230px', boxShadow: SHADOW }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.muted} strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter units…"
             style={{ background: 'none', border: 'none', color: T.text, fontSize: 12, width: '100%', outline: 'none' }} />
         </div>
         <Button variant={heatmap ? 'accent' : 'ghost'} onClick={() => setHeatmap(h => !h)} size="sm">
-          🌡 Heatmap {heatmap ? 'ON' : 'OFF'}
+          Heatmap {heatmap ? 'ON' : 'OFF'}
         </Button>
+        <Button variant="ghost" onClick={exportJSON} size="sm">Export JSON</Button>
         <div style={{ flex: 1 }} />
-        <Button variant="ghost" onClick={exportJSON} size="sm">⬇ Export JSON</Button>
-        <div style={{ fontSize: 11, color: T.muted }}>{filtered.length}×{filtered.length} matrix · {Object.values(rates).flatMap(Object.values).filter(Boolean).length} rates</div>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: `${T.accent}10`, border: `1px solid ${T.accent}22`, borderRadius: 20, fontSize: 11, color: T.muted }}>
+          <span style={{ color: T.accent, fontWeight: 700, fontFamily: 'JetBrains Mono' }}>{filtered.length}×{filtered.length}</span> matrix ·
+          <span style={{ color: T.accent, fontWeight: 700, fontFamily: 'JetBrains Mono' }}>{totalRates}</span> rates
+        </div>
       </div>
 
       {/* Matrix table */}
-      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
+      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, overflow: 'auto', maxHeight: 'calc(100vh - 230px)', boxShadow: SHADOW }}>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
           <thead>
             <tr>
               <th style={{
                 position: 'sticky', top: 0, left: 0, zIndex: 10,
-                background: '#0d1526', padding: '12px 16px', fontSize: 10,
-                color: T.muted, textTransform: 'uppercase', letterSpacing: '0.08em',
-                borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`,
-                minWidth: 110,
+                background: headBg, padding: '12px 16px', fontSize: 9.5,
+                color: T.muted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700,
+                borderRight: `1px solid ${T.border}`, borderBottom: `2px solid ${T.accent}33`,
+                minWidth: 116, textAlign: 'left',
               }}>
-                FROM ↓ / TO →
+                From ↓ / To →
               </th>
               {filtered.map(u => {
-                const meta = unitMeta[u] || { icon: '🔷', color: T.accent }
+                const meta = unitMeta[u] || { icon: '•', color: T.accent }
                 return (
                   <th key={u} style={{
                     position: 'sticky', top: 0, zIndex: 5,
-                    background: '#0d1526', borderBottom: `1px solid ${T.border}`,
-                    padding: '10px 12px', minWidth: 108,
+                    background: headBg, borderBottom: `2px solid ${meta.color}44`,
+                    padding: '9px 12px', minWidth: 110,
                   }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <span style={{ fontSize: 15 }}>{meta.icon}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <span style={{ width: 24, height: 24, borderRadius: 7, background: `${meta.color}1c`, color: meta.color, fontSize: 11, fontWeight: 800, fontFamily: 'JetBrains Mono', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{meta.icon}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: meta.color }}>{u}</span>
                     </div>
                   </th>
@@ -125,23 +131,23 @@ export default function MatrixPage() {
           </thead>
           <tbody>
             {filtered.map((from, fi) => {
-              const fromMeta = unitMeta[from] || { icon: '🔷', color: T.accent }
+              const fromMeta = unitMeta[from] || { icon: '•', color: T.accent }
               return (
                 <tr key={from}>
                   <td style={{
                     position: 'sticky', left: 0, zIndex: 4,
-                    background: '#0d1526', borderRight: `1px solid ${T.border}`,
+                    background: headBg, borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`,
                     padding: '8px 14px',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 13 }}>{fromMeta.icon}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                      <span style={{ width: 24, height: 24, borderRadius: 7, background: `${fromMeta.color}1c`, color: fromMeta.color, fontSize: 11, fontWeight: 800, fontFamily: 'JetBrains Mono', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{fromMeta.icon}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: fromMeta.color }}>{from}</span>
                     </div>
                   </td>
 
                   {filtered.map((to, ti) => {
                     if (from === to) return (
-                      <td key={to} style={{ textAlign: 'center', color: T.muted, fontSize: 16, background: 'rgba(255,255,255,0.02)' }}>—</td>
+                      <td key={to} style={{ textAlign: 'center', color: T.muted, fontSize: 16, background: 'rgba(15,23,42,0.025)', borderBottom: `1px solid ${T.border}` }}>—</td>
                     )
                     const rate = rates[from]?.[to]
                     const cellKey = `${from}-${to}`
@@ -163,18 +169,18 @@ export default function MatrixPage() {
                             onKeyDown={e => handleKeyDown(e, from, to)}
                             style={{
                               width: 90, textAlign: 'center', fontSize: 12, fontFamily: 'JetBrains Mono',
-                              background: `${T.accent}18`, border: `1.5px solid ${T.accent}`,
-                              borderRadius: 5, color: T.text, padding: '5px 4px', outline: 'none',
+                              background: `${T.accent}14`, border: `1.5px solid ${T.accent}`,
+                              borderRadius: 6, color: T.text, padding: '5px 4px', outline: 'none',
                             }}
                           />
                         ) : (
                           <motion.div
                             onClick={() => startEdit(from, to)}
-                            whileHover={{ scale: 1.04 }}
+                            whileHover={{ scale: 1.05 }}
                             style={{
-                              padding: '6px 8px', borderRadius: 6, cursor: 'pointer', fontSize: 11,
-                              background: rate ? `${T.accent}08` : 'transparent',
-                              border: `1px solid ${rate ? `${T.accent}20` : 'transparent'}`,
+                              padding: '6px 8px', borderRadius: 7, cursor: 'pointer', fontSize: 11,
+                              background: rate ? `${T.accent}0c` : 'transparent',
+                              border: `1px solid ${rate ? `${T.accent}22` : 'transparent'}`,
                               color: rate ? T.text : T.muted, fontFamily: 'JetBrains Mono', fontWeight: rate ? 500 : 400,
                               transition: 'all 0.15s',
                             }}
@@ -192,9 +198,17 @@ export default function MatrixPage() {
         </table>
       </div>
 
-      <div style={{ marginTop: 10, display: 'flex', gap: 20, fontSize: 11, color: T.muted }}>
-        <span>💡 Click any cell to edit · Arrow keys to navigate · Enter to confirm</span>
-        {heatmap && <span>🌡 Blue = low rate · Green = high rate (relative)</span>}
+      <div style={{ marginTop: 12, display: 'flex', gap: 18, fontSize: 11, color: T.muted, flexWrap: 'wrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent }} />
+          Click any cell to edit · Arrow keys to navigate · Enter to confirm
+        </span>
+        {heatmap && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 22, height: 6, borderRadius: 3, background: 'linear-gradient(90deg, #2563EB, #059669)' }} />
+            Blue = low rate · Green = high rate (relative)
+          </span>
+        )}
       </div>
     </div>
   )

@@ -2,22 +2,23 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
 import { Button, Card, Input, Modal, Badge, T } from '../components/ui'
+import { Icons } from '../components/layout'
 
 const PRESETS = [
-  { name: 'GOLD',   icon: '🥇', color: '#F59E0B', category: 'Commodity' },
-  { name: 'WOOD',   icon: '🪵', color: '#92400E', category: 'Commodity' },
-  { name: 'IRON',   icon: '⚙️', color: '#6B7280', category: 'Commodity' },
-  { name: 'SILVER', icon: '🥈', color: '#94A3B8', category: 'Commodity' },
-  { name: 'ENERGY', icon: '⚡', color: '#EAB308', category: 'Resource'  },
-  { name: 'WATER',  icon: '💧', color: '#0EA5E9', category: 'Resource'  },
-  { name: 'FOOD',   icon: '🌽', color: '#22C55E', category: 'Resource'  },
-  { name: 'COFFEE', icon: '☕', color: '#78350F', category: 'Token'     },
-  { name: 'HOURS',  icon: '⏰', color: '#8B5CF6', category: 'Service'   },
-  { name: 'DATA',   icon: '📊', color: '#06B6D4', category: 'Digital'   },
-  { name: 'CARBON', icon: '🌿', color: '#16A34A', category: 'Credit'    },
-  { name: 'STONE',  icon: '🪨', color: '#78716C', category: 'Commodity' },
-  { name: 'GEMS',   icon: '💎', color: '#EC4899', category: 'Rare'      },
-  { name: 'TOKENS', icon: '🪙', color: '#F97316', category: 'Token'     },
+  { name: 'GOLD',   icon: 'Au', color: '#D97706', category: 'Commodity' },
+  { name: 'WOOD',   icon: 'Wd', color: '#92400E', category: 'Commodity' },
+  { name: 'IRON',   icon: 'Fe', color: '#6B7280', category: 'Commodity' },
+  { name: 'SILVER', icon: 'Ag', color: '#94A3B8', category: 'Commodity' },
+  { name: 'ENERGY', icon: 'En', color: '#CA8A04', category: 'Resource'  },
+  { name: 'WATER',  icon: 'Wa', color: '#0EA5E9', category: 'Resource'  },
+  { name: 'FOOD',   icon: 'Fd', color: '#16A34A', category: 'Resource'  },
+  { name: 'COFFEE', icon: 'Co', color: '#78350F', category: 'Token'     },
+  { name: 'HOURS',  icon: 'Hr', color: '#7C3AED', category: 'Service'   },
+  { name: 'DATA',   icon: 'Dt', color: '#0891B2', category: 'Digital'   },
+  { name: 'CARBON', icon: 'Cb', color: '#16A34A', category: 'Credit'    },
+  { name: 'STONE',  icon: 'St', color: '#78716C', category: 'Commodity' },
+  { name: 'GEMS',   icon: 'Gm', color: '#DB2777', category: 'Rare'      },
+  { name: 'TOKENS', icon: 'Tk', color: '#F97316', category: 'Token'     },
 ]
 
 function UnitCard({ unit, meta, rates, onEdit, onRemove }) {
@@ -39,7 +40,7 @@ function UnitCard({ unit, meta, rates, onEdit, onRemove }) {
       {/* Color strip */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: meta.color, borderRadius: '12px 12px 0 0' }} />
 
-      <div style={{ fontSize: 32, marginBottom: 10, marginTop: 4 }}>{meta.icon}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, color: meta.color, fontFamily: 'JetBrains Mono', marginBottom: 10, marginTop: 4, lineHeight: 1 }}>{meta.icon}</div>
       <div style={{ fontSize: 15, fontWeight: 800, color: meta.color, marginBottom: 3 }}>{unit}</div>
       <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>{meta.category}</div>
       {meta.description && <div style={{ fontSize: 10, color: T.muted, marginBottom: 10, lineHeight: 1.4 }}>{meta.description}</div>}
@@ -51,7 +52,7 @@ function UnitCard({ unit, meta, rates, onEdit, onRemove }) {
 
       <div style={{ display: 'flex', gap: 6 }}>
         <Button variant="ghost" size="sm" onClick={() => onEdit(unit)} style={{ flex: 1, justifyContent: 'center' }}>Edit</Button>
-        <Button variant="danger" size="sm" onClick={() => onRemove(unit)}>🗑</Button>
+        <Button variant="danger" size="sm" onClick={() => onRemove(unit)}>Remove</Button>
       </div>
     </motion.div>
   )
@@ -110,7 +111,7 @@ export default function CustomUnitsPage() {
   })
 
   const openEdit = (name) => {
-    const meta = unitMeta[name] || { icon: '🔷', color: T.accent, category: 'Custom', description: '' }
+    const meta = unitMeta[name] || { icon: '•', color: T.accent, category: 'Custom', description: '' }
     setEditUnit(name)
     setEditForm({ ...meta })
   }
@@ -137,16 +138,16 @@ export default function CustomUnitsPage() {
               <motion.div key={p.name} whileHover={!exists ? { scale: 1.05 } : {}}
                 onClick={() => !exists && addPreset(p)}
                 style={{
-                  padding: '6px 12px', background: exists ? 'rgba(255,255,255,0.03)' : `${p.color}12`,
+                  padding: '6px 12px', background: exists ? 'rgba(15,23,42,0.03)' : `${p.color}12`,
                   border: `1px ${exists ? 'solid' : 'dashed'} ${p.color}${exists ? '20' : '50'}`,
                   borderRadius: 8, cursor: exists ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6,
                   opacity: exists ? 0.4 : 1, fontSize: 12,
                 }}
               >
-                <span>{p.icon}</span>
+                <span style={{ color: p.color, fontWeight: 700, fontFamily: 'JetBrains Mono', fontSize: 11 }}>{p.icon}</span>
                 <span style={{ color: p.color, fontWeight: 600 }}>{p.name}</span>
                 <span style={{ color: T.muted, fontSize: 10 }}>{p.category}</span>
-                {exists && <span style={{ color: T.muted, fontSize: 10 }}>✓</span>}
+                {exists && <span style={{ color: T.muted, display: 'flex' }}><Icons.Check /></span>}
               </motion.div>
             )
           })}
@@ -176,7 +177,7 @@ export default function CustomUnitsPage() {
       <AnimatePresence>
         <motion.div layout style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: 14 }}>
           {filtered.map(u => (
-            <UnitCard key={u} unit={u} meta={unitMeta[u] || { icon: '🔷', color: T.accent, category: 'Custom' }}
+            <UnitCard key={u} unit={u} meta={unitMeta[u] || { icon: '•', color: T.accent, category: 'Custom' }}
               rates={rates} onEdit={openEdit} onRemove={removeUnit} />
           ))}
         </motion.div>
@@ -186,7 +187,7 @@ export default function CustomUnitsPage() {
       <Modal open={!!editUnit} onClose={() => setEditUnit(null)} title={`Edit Unit — ${editUnit}`} width={380}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', gap: 10 }}>
-            <Input label="Icon / Emoji" value={editForm.icon || ''} onChange={e => setEditForm(p => ({ ...p, icon: e.target.value }))} style={{ width: 90 }} />
+            <Input label="Symbol" value={editForm.icon || ''} onChange={e => setEditForm(p => ({ ...p, icon: e.target.value }))} style={{ width: 90 }} />
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: 10, color: T.muted, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Color</label>
               <input type="color" value={editForm.color || '#3B82F6'} onChange={e => setEditForm(p => ({ ...p, color: e.target.value }))}

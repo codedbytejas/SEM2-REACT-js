@@ -7,6 +7,7 @@ import {
 import useAppStore from '../store/useAppStore'
 import { computeArbitrageOpportunities, countActivePaths } from '../lib/algorithms'
 import { StatCard, Card, Badge, EmptyState, T } from '../components/ui'
+import { Icons } from '../components/layout'
 
 const CHART_COLORS = [T.accent, T.profit, T.warning, T.purple, T.cyan, T.pink, T.loss]
 
@@ -94,11 +95,11 @@ export default function AnalyticsPage() {
 
       {/* KPI row */}
       <motion.div variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
-        <StatCard label="Total Units"    value={units.length}           sub="Active nodes"         color={T.accent}  icon="⬡" />
-        <StatCard label="Active Paths"   value={activePaths}            sub="Directed edges"       color={T.cyan}    icon="⟶" />
-        <StatCard label="Arb Loops"      value={opps.length}            sub="Detected cycles"      color={T.profit}  icon="⚡" />
-        <StatCard label="Avg Gross ROI"  value={`+${avgProfit.toFixed(3)}%`} sub="Per opportunity" color={T.warning} icon="%" />
-        <StatCard label="Simulations"    value={simHistory.length}      sub="Total runs"           color={T.purple}  icon="▶" />
+        <StatCard label="Total Units"    value={units.length}           sub="Active nodes"         color={T.accent}  icon={<Icons.Hexagon />} />
+        <StatCard label="Active Paths"   value={activePaths}            sub="Directed edges"       color={T.cyan}    icon={<Icons.ArrowRight />} />
+        <StatCard label="Arb Loops"      value={opps.length}            sub="Detected cycles"      color={T.profit}  icon={<Icons.Zap />} />
+        <StatCard label="Avg Gross ROI"  value={`+${avgProfit.toFixed(3)}%`} sub="Per opportunity" color={T.warning} icon={<Icons.Percent />} />
+        <StatCard label="Simulations"    value={simHistory.length}      sub="Total runs"           color={T.purple}  icon={<Icons.Play />} />
       </motion.div>
 
       {/* Main charts row */}
@@ -122,7 +123,7 @@ export default function AnalyticsPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon="📊" title="No data yet" body="Add rates and detect arbitrage loops." />
+              <EmptyState icon={<Icons.Empty />} title="No data yet" body="Add rates and detect arbitrage loops." />
             )}
           </Card>
         </motion.div>
@@ -144,7 +145,7 @@ export default function AnalyticsPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon="📉" title="No loop data" body="Adjust rates to generate arbitrage cycles." />
+              <EmptyState icon={<Icons.Empty />} title="No loop data" body="Adjust rates to generate arbitrage cycles." />
             )}
           </Card>
         </motion.div>
@@ -166,7 +167,7 @@ export default function AnalyticsPage() {
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <EmptyState icon="⚠" title="No data" body="" />}
+            ) : <EmptyState icon={<Icons.Empty />} title="No data" body="" />}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
               {riskPie.map(d => (
                 <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
@@ -194,7 +195,7 @@ export default function AnalyticsPage() {
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <EmptyState icon="📊" title="No data" body="" />}
+            ) : <EmptyState icon={<Icons.Empty />} title="No data" body="" />}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
               {statusPie.map(d => (
                 <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
@@ -222,7 +223,7 @@ export default function AnalyticsPage() {
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <EmptyState icon="⬡" title="No data" body="" />}
+            ) : <EmptyState icon={<Icons.Empty />} title="No data" body="" />}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
               {byCat.map(d => (
                 <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
