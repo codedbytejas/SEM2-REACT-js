@@ -1,12 +1,12 @@
-## 2.1 Project Title
+## 1 Project Title
 
 ArbMatrix — Visual Arbitrage Explorer and Simulator
 
-## 2.2 Problem Statement
+## 2 Problem Statement
 
 Decentralized and multi-exchange markets can contain transient price inconsistencies across trading pairs. Detecting and evaluating arbitrage cycles (loops of conversions that return more than the starting capital) in an exchange-rate matrix is non-trivial when transaction frictions (fees, slippage) are considered. The project aims to find, rank and simulate arbitrage opportunities from a matrix of pairwise exchange rates.
 
-## 2.3 Objectives
+## 3 Objectives
 
 - Provide a responsive UI to edit and view an exchange-rate matrix.
 - Detect cyclical arbitrage opportunities using a numerical graph transformation and cycle-detection algorithm.
@@ -14,7 +14,7 @@ Decentralized and multi-exchange markets can contain transient price inconsisten
 - Offer simulation and compounding on candidate loops to evaluate realistic returns.
 - Present risk/confidence metrics and interactive visualization for exploration.
 
-## 2.4 System Overview / Architecture
+## 4 System Overview / Architecture
 
 The project is a single-page React application scaffolded with Vite. Key parts:
 
@@ -29,7 +29,7 @@ Data flow:
 2. The Arbitrage page invokes `computeArbitrageOpportunities(units, rates, fees)` from `src/lib/algorithms.js` to compute candidate loops and metrics.
 3. Users can view a loop, open the Loop visualizer, or run a simulation which uses `simulateLoop(...)` to produce step-by-step compounding results.
 
-## 2.5 Data Structures and Algorithms Used
+## 5 Data Structures and Algorithms Used
 
 Data structures:
 
@@ -45,7 +45,7 @@ Algorithms:
   - Each candidate loop is validated against live rates, profited multiplier is computed, and fees/slippage are simulated step-by-step to produce net profit, fee impact, and a simple heuristic risk score.
 - Utilities: adjacency matrix builder (`buildMatrix`), path counters and formatting helpers.
 
-## 2.6 Implementation Approach
+## 6 Implementation Approach
 
 1. Represent the exchange graph as an adjacency map for fast lookups when simulating a loop.
 2. Convert multiplicative rates to additive weights using `-Math.log(rate)` to detect profitable cycles using Bellman-Ford.
@@ -59,7 +59,7 @@ Implementation notes:
 - The code lives in `src/lib/algorithms.js`. The Arbitrage UI uses `computeArbitrageOpportunities` (see `src/pages/ArbitragePage.jsx`).
 - UI components are small, presentational and live in `src/components` and nested folders.
 
-## 2.7 Time and Space Complexity Analysis
+## 7 Time and Space Complexity Analysis
 
 Bellman-Ford (as used):
 - Time complexity: O(V * E), where V = number of units and E = number of directed edges (active rates). In the dense worst case E = O(V^2) making worst-case time O(V^3). Practically, for small/medium matrices (dozens of units) this runs quickly in the browser.
@@ -74,7 +74,7 @@ Edge cases and limits:
 - Extremely large V (hundreds+) may make the browser CPU-bound. Consider server-side detection or pruning the graph.
 - Rates that are zero/invalid are skipped; disconnected nodes are handled gracefully.
 
-## 2.8 Execution Steps
+## 8 Execution Steps
 
 Prerequisites: Node.js (16+ recommended) and npm.
 
@@ -104,7 +104,7 @@ node scripts/capture-screenshots.js http://localhost:5173
 
 Captured images will be saved to `public/screenshots/` as `arbitrage-list.png` and `simulator.png`.
 
-## 2.9 Sample Inputs and Outputs
+## 9 Sample Inputs and Outputs
 
 Sample input (example units + rates):
 
@@ -140,7 +140,7 @@ Expected sample output (trimmed representation from `computeArbitrageOpportuniti
 
 The exact numbers depend on entered rates and fees. Use the Simulator page to step through compounding for a chosen loop.
 
-## 2.10 Screenshots
+## 10 Screenshots
 
 Add screenshots to `public/screenshots/` (or a `docs/screenshots/` folder) and reference them here. Example markdown when you add images:
 
@@ -154,14 +154,14 @@ Placeholders (please replace with actual images):
 - `public/screenshots/arbitrage-list.png` — list of detected opportunities.
 - `public/screenshots/simulator.png` — simulator step-by-step output.
 
-## 2.11 Results and Observations
+## 11 Results and Observations
 
 - The -ln(rate) transform combined with Bellman-Ford reliably identifies multiplicative arbitrage cycles as negative cycles.
 - In practice, small gross profits are often eliminated once reasonable fees and slippage are applied; the project simulates fees per swap to show realistic net returns.
 - The heuristic risk and confidence scores help triage which loops are worth further simulation.
 - UX: interactive sorting and direct simulation helps explore edge cases quickly.
 
-## 2.12 Conclusion
+## 12 Conclusion
 
 ArbMatrix demonstrates a compact, browser-based approach to detect and evaluate arbitrage cycles using a mathematically sound transform (logarithms) and the Bellman-Ford algorithm. The app complements raw detection with fee-aware simulations and simple risk heuristics to make findings actionable for further research or integration into execution pipelines. For larger graphs or production-grade automated execution, consider migrating heavy detection to a server-side process and integrating real-time market feeds.
 
