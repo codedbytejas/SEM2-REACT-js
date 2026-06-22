@@ -1,8 +1,29 @@
+/*
+=================================================
+FILE: src/pages/DashboardPage.jsx
+
+Purpose:
+Yeh Dashboard page render karta hai — overview cards, summaries aur charts.
+
+Is file mein:
+1. Store se summary data le kar cards show hote hain
+2. Charts aur lists render hote hain
+
+Viva Explanation:
+Dashboard ek summary view hai jo multiple child components ko combine karta hai.
+=================================================
+*/
+// React hook for memoization
 import { useMemo } from 'react'
+// framer-motion for animation wrappers
 import { motion } from 'framer-motion'
+// Custom Zustand store hook — global app state
 import useAppStore from '../store/useAppStore'
+// Algorithm helpers
 import { computeArbitrageOpportunities, countActivePaths } from '../lib/algorithms'
+// UI primitives used in this page
 import { Card, Button, EmptyState, ProgressBar, T, SHADOW } from '../components/ui'
+// Icon set from layout
 import { Icons } from '../components/layout'
 
 const container = {
@@ -15,6 +36,8 @@ const item = {
 }
 
 // ─── KPI tile ─────────────────────────────────────────────────────────────────
+// Small KPI tile component used multiple times on dashboard
+// Shows a label, a big value and a small icon chip
 function Kpi({ icon, label, value, sub, color, pulse }) {
   return (
     <motion.div
@@ -46,6 +69,7 @@ function Kpi({ icon, label, value, sub, color, pulse }) {
 }
 
 // ─── Section title ────────────────────────────────────────────────────────────
+// Reusable section header within pages
 function SectionTitle({ color, children, action }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -57,6 +81,7 @@ function SectionTitle({ color, children, action }) {
 }
 
 // ─── Hero button ──────────────────────────────────────────────────────────────
+// Simple button component used in hero area. `solid` toggles styling.
 function HeroBtn({ children, onClick, solid }) {
   return (
     <motion.button
@@ -76,16 +101,22 @@ function HeroBtn({ children, onClick, solid }) {
 }
 
 export default function DashboardPage() {
+  // Use global store values
   const { units, rates, fees, unitMeta, simHistory, setPage, setSelectedLoop } = useAppStore()
 
+  // Compute opportunities only when units/rates/fees change (expensive)
   const opportunities = useMemo(() => computeArbitrageOpportunities(units, rates, fees), [units, rates, fees])
+  // Count active directed edges in the rate graph
   const activePaths   = useMemo(() => countActivePaths(units, rates), [units, rates])
+  // Pick the best opportunity (first after sorting in compute function)
   const best = opportunities[0]
+  // Quick stats computed from opportunities array
   const profitableCount = opportunities.filter(o => o.status === 'profitable').length
   const avgRisk = opportunities.length
     ? Math.round(opportunities.reduce((a, b) => a + b.risk, 0) / opportunities.length)
     : null
 
+  // Prepare small dataset for the profit distribution UI (limits to top 8)
   const profitBuckets = useMemo(() => {
     return opportunities.slice(0, 8).map((o, i) => ({
       label: `Loop ${i + 1}`,
@@ -95,8 +126,13 @@ export default function DashboardPage() {
     }))
   }, [opportunities])
 
+  // Hinglish: profitBuckets top opportunities ka chhota dataset banata — UI me top results dikhane ke liye.
+
+  // Recent simulation history and risk color mapping for display
   const recentSims = simHistory.slice(-5).reverse()
   const riskColor = avgRisk === null ? T.muted : avgRisk < 40 ? T.profit : avgRisk < 70 ? T.warning : T.loss
+
+  // Hinglish: riskColor dashboard ke kuch tiles me use hota; agar avgRisk null ho to muted dikhaye.
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>

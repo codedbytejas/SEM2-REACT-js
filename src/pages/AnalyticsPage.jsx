@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/AnalyticsPage.jsx
+
+Purpose:
+Analytics page charts aur historical visualizations render karta hai.
+
+Is file mein:
+1. Chart components use hote hain (recharts)
+2. Store se historical data fetch karke show kiya jata hai
+
+Viva Explanation:
+Analytics page data visualization focus karta hai — charts ko samjhana important hai.
+=================================================
+*/
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
@@ -13,6 +28,8 @@ const CHART_COLORS = [T.accent, T.profit, T.warning, T.purple, T.cyan, T.pink, T
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
+  // Hinglish: Agar tooltip active nahi hai ya payload empty hai to kuch render mat karo.
+  // Ye check performant rakhta hai aur empty tooltip se UI kharab nahi hota.
   return (
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: '10px 14px', fontSize: 12 }}>
       {label && <div style={{ color: T.muted, marginBottom: 6 }}>{label}</div>}
@@ -31,7 +48,10 @@ const fadeUp  = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, trans
 export default function AnalyticsPage() {
   const { units, rates, fees, unitMeta, simHistory } = useAppStore()
 
+  // Hinglish: store se sab required data le liya. agar koi value missing ho to components defensive checks karte hain.
+
   const opps       = useMemo(() => computeArbitrageOpportunities(units, rates, fees), [units, rates, fees])
+  // Hinglish: computeArbitrageOpportunities heavy ho sakta hai -> useMemo lagaya hai taaki unnecessary recalcs na ho
   const activePaths = useMemo(() => countActivePaths(units, rates), [units, rates])
   const avgProfit  = opps.length ? opps.reduce((a, b) => a + b.grossProfitPct, 0) / opps.length : 0
   const bestOpp    = opps[0]
@@ -43,6 +63,7 @@ export default function AnalyticsPage() {
       net: +o.netProfit.toFixed(4), fees: +o.feeImpact.toFixed(4),
       steps: o.steps,
     })), [opps])
+  // Hinglish: Chart ke liye data ko normalize kar rahe hain (toFixed + number cast). Isse chart labels consistent dikhte hain.
 
   // By step count
   const byStep = useMemo(() => {
@@ -79,6 +100,7 @@ export default function AnalyticsPage() {
     simHistory.slice(-20).map((s, i) => ({
       run: `#${simHistory.length - 19 + i}`, roi: +s.roi.toFixed(4), profit: +s.netProfit?.toFixed?.(4),
     })), [simHistory])
+  // Hinglish: Simulation history ka last 20 runs use kar rahe — agar history chhoti ho to slice safe hai.
 
   // Category breakdown
   const byCat = useMemo(() => {
@@ -89,11 +111,13 @@ export default function AnalyticsPage() {
     }
     return Object.entries(map).map(([name, value], i) => ({ name, value, color: CHART_COLORS[i % CHART_COLORS.length] }))
   }, [units, unitMeta])
+  // Hinglish: Units ko category-wise count kar liya; CHART_COLORS index modulo se safe color assign.
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* KPI row */}
+  {/* KPI row */}
+  {/* Hinglish: Upar wali row mein important metrics dikh rahe hain. Ye sirf display purpose ke liye hain. */}
       <motion.div variants={fadeUp} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
         <StatCard label="Total Units"    value={units.length}           sub="Active nodes"         color={T.accent}  icon={<Icons.Hexagon />} />
         <StatCard label="Active Paths"   value={activePaths}            sub="Directed edges"       color={T.cyan}    icon={<Icons.ArrowRight />} />

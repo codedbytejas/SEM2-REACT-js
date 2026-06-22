@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/SimulatorPage.jsx
+
+Purpose:
+Simulator page simulates compounding a loop over capital and shows ROI.
+
+Is file mein:
+1. simulateLoop helper use hota hai
+2. Inputs for initial capital and steps
+
+Viva Explanation:
+Simulator demonstrates practical effect of fees/slippage on loops.
+=================================================
+*/
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
@@ -83,8 +98,12 @@ export default function SimulatorPage() {
     }, 600)
   }
 
+  // Hinglish: handleSimulate simulateLoop ko call karke result store karta aur simulation history me add karta.
+
   // Compound multiple runs
   const compoundRoi = result ? ((Math.pow(1 + result.roi / 100, runs) - 1) * 100) : null
+
+  // Hinglish: compoundRoi compound interest formula se nikalta — agar runs zyada to exponential growth show karega.
 
   return (
     <div style={{ padding: 24, maxWidth: 860 }}>

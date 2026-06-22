@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/LoopVisualizerPage.jsx
+
+Purpose:
+Loop Visualizer step-through visualizer for a single arbitrage loop.
+
+Is file mein:
+1. Step by step visualization of conversions in a loop
+2. Controls to advance/rewind steps and simulate fees
+
+Viva Explanation:
+Yeh page algorithmic loop ko user-friendly steps mein todta hai.
+=================================================
+*/
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ReactFlow, Background, Controls, MiniMap, useNodesState, useEdgesState } from '@xyflow/react'
@@ -31,6 +46,7 @@ function UnitNode({ data }) {
     </div>
   )
 }
+// Hinglish: UnitNode element graph ke andar har node ka visual define karta — amount, active/past state dikhata.
 
 const nodeTypes = { unit: UnitNode }
 
@@ -82,6 +98,7 @@ function buildFlowGraph(loop, unitMeta, step, stepData) {
 
   return { nodes, edges }
 }
+// Hinglish: buildFlowGraph loop ke current step ke hisaab se nodes/edges banata; stepData se amounts map hote.
 
 export default function LoopVisualizerPage() {
   const { units, rates, fees, unitMeta, selectedLoop, setSelectedLoop, setPage } = useAppStore()
@@ -108,6 +125,8 @@ export default function LoopVisualizerPage() {
     })
   }, [loop, rates, fees])
 
+  // Hinglish: stepData pure simulation deta hai — har swap ke baad capital kya hua, fees kitni lagi.
+
   useEffect(() => {
     if (!playing) return
     const id = setInterval(() => {
@@ -118,6 +137,8 @@ export default function LoopVisualizerPage() {
     }, 900)
     return () => clearInterval(id)
   }, [playing, loop])
+
+  // Hinglish: playing state se auto-play chal raha hai — interval se step increment hota.
 
   const { nodes: initNodes, edges: initEdges } = useMemo(
     () => buildFlowGraph(loop, unitMeta, step, stepData),

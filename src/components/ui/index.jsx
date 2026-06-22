@@ -1,7 +1,24 @@
+/*
+=================================================
+FILE: src/components/ui/index.jsx
+
+Purpose:
+Yeh file UI primitives aur design tokens define karta hai: colors, buttons, cards, modal, badges etc.
+
+Is file mein:
+1. Design tokens `T`, `SHADOW`, `GRADIENT`
+2. Reusable components: SectionTitle, AnimatedNumber, StatCard, Badge, Button, Input, Card, Modal, NotificationToast, Spinner, ProgressBar, Divider
+
+Viva Explanation:
+Yeh components small aur re-usable hain. Agar design change karna ho toh tokens (T) ko update karo aur UI automatically change ho jayega.
+React concepts: controlled inputs, animation with framer-motion, useEffect for animation timing, useRef for preserving values
+=================================================
+*/
+
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
-// ─── Design tokens ─────────────────────────────────────────────────────────────
+// ─── Design tokens — centralized colors and tokens
 export const T = {
   bg: '#F4F6FB', surface: '#EEF2F8', card: '#FFFFFF',
   border: 'rgba(15,23,42,0.10)',
@@ -10,6 +27,8 @@ export const T = {
   text: '#0F172A', muted: '#64748B', pink: '#DB2777',
 }
 
+// Hinglish: `T` tokens central jagah pe colors store karte — agar theme change karna ho to yahin change karo.
+
 // Soft elevation shadows for the light theme
 export const SHADOW    = '0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04)'
 export const SHADOW_LG = '0 12px 32px rgba(15,23,42,0.12)'
@@ -17,8 +36,11 @@ export const SHADOW_LG = '0 12px 32px rgba(15,23,42,0.12)'
 // Shared brand gradient (matches sidebar / header)
 export const GRADIENT = 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)'
 
-// ─── Section title (colored bar + optional icon chip) ──────────────────────────
+// Hinglish: GRADIENT shared visual accent hai — header/sidebar aur buttons me use hota.
+
+// ─── Section title (colored bar + optional icon chip)
 export function SectionTitle({ color = '#2563EB', icon, children, action, style }) {
+  // Simple presentational component: left colored strip + optional icon + title + optional action
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 18, ...style }}>
       <span style={{ width: 4, height: 18, borderRadius: 2, background: color }} />
@@ -30,17 +52,22 @@ export function SectionTitle({ color = '#2563EB', icon, children, action, style 
     </div>
   )
 }
+// Hinglish: SectionTitle ek chhota helper hai jo section ke upar title dikhata; koi state nahi rakhta.
 
-// ─── Animated number counter ──────────────────────────────────────────────────
+// ─── Animated number counter — React + requestAnimationFrame example
 export function AnimatedNumber({ value, decimals = 2, prefix = '', suffix = '', duration = 700 }) {
+  // display holds the interpolated value shown to the user
   const [display, setDisplay] = useState(value)
   const prevRef = useRef(value)
+
+  // useEffect to animate on value change using requestAnimationFrame
   useEffect(() => {
     const start = prevRef.current
     const end = value
     const startTime = performance.now()
     const tick = (now) => {
       const t = Math.min((now - startTime) / duration, 1)
+      // ease-out cubic for smoothness
       const eased = 1 - Math.pow(1 - t, 3)
       setDisplay(start + (end - start) * eased)
       if (t < 1) requestAnimationFrame(tick)
@@ -48,10 +75,12 @@ export function AnimatedNumber({ value, decimals = 2, prefix = '', suffix = '', 
     }
     requestAnimationFrame(tick)
   }, [value, duration])
+
   return <span>{prefix}{display.toFixed(decimals)}{suffix}</span>
 }
+// Hinglish: AnimatedNumber requestAnimationFrame se value smoothly change kara deta — presentation-only.
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
+// ─── Stat card — shows a label and a number, optional icon
 export function StatCard({ label, value, sub, color = T.accent, icon, pulse }) {
   return (
     <motion.div
@@ -78,8 +107,9 @@ export function StatCard({ label, value, sub, color = T.accent, icon, pulse }) {
     </motion.div>
   )
 }
+// Hinglish: StatCard chhota summary card hai — label/value dikhata aur optional icon.
 
-// ─── Badge ────────────────────────────────────────────────────────────────────
+// ─── Badge — small pill used for counts/status
 export function Badge({ children, color = T.accent, glow = false }) {
   return (
     <span style={{
@@ -93,22 +123,25 @@ export function Badge({ children, color = T.accent, glow = false }) {
     </span>
   )
 }
+// Hinglish: Badge small pill style component hai — status ya counts dikhane ke liye use hota.
 
-// ─── Confidence badge ─────────────────────────────────────────────────────────
+// ─── ConfidenceBadge — small semantic badge
 export function ConfidenceBadge({ level }) {
   const map = { HIGH: T.profit, MED: T.warning, LOW: T.loss }
   const color = map[level] || T.muted
   return <Badge color={color} glow={level === 'HIGH'}>{level}</Badge>
 }
+// Hinglish: ConfidenceBadge domain-specific label show karta (HIGH/MED/LOW).
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+// ─── StatusBadge — human readable status pill
 export function StatusBadge({ status }) {
   const map = { profitable: T.profit, marginal: T.warning, eliminated: T.loss }
   const label = { profitable: '● Profitable', marginal: '● Marginal', eliminated: '● Eliminated' }
   return <Badge color={map[status] || T.muted}>{label[status] || status}</Badge>
 }
+// Hinglish: StatusBadge human-friendly status text dikhata (profitable/marginal/eliminated).
 
-// ─── Button ───────────────────────────────────────────────────────────────────
+// ─── Button — reusable button with variants
 export function Button({ children, variant = 'ghost', onClick, disabled, style, size = 'md' }) {
   const styles = {
     primary: { background: T.accent, color: '#fff', border: 'none' },
@@ -138,8 +171,9 @@ export function Button({ children, variant = 'ghost', onClick, disabled, style, 
     </motion.button>
   )
 }
+// Hinglish: Button reusable UI primitive hai with variants (primary/ghost/danger...).
 
-// ─── Input ────────────────────────────────────────────────────────────────────
+// ─── Input — controlled or uncontrolled input wrapper with label
 export function Input({ label, ...props }) {
   return (
     <div>
@@ -156,8 +190,9 @@ export function Input({ label, ...props }) {
     </div>
   )
 }
+// Hinglish: Input ek thin wrapper hai native input ka — focus/blur pe styling apply karta.
 
-// ─── Section header ───────────────────────────────────────────────────────────
+// ─── Section header — title + optional sub + action
 export function SectionHeader({ title, sub, action }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -169,8 +204,9 @@ export function SectionHeader({ title, sub, action }) {
     </div>
   )
 }
+// Hinglish: SectionHeader page-level grouping ke liye, title + optional sub + action.
 
-// ─── Card ─────────────────────────────────────────────────────────────────────
+// ─── Card — general purpose surface with hover effect
 export function Card({ children, style, hover = true, glowColor }) {
   return (
     <motion.div
@@ -185,8 +221,9 @@ export function Card({ children, style, hover = true, glowColor }) {
     </motion.div>
   )
 }
+// Hinglish: Card ek reusable container hai — shadow/hover behavior centralized.
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
+// ─── Empty state — shown when page has no data
 export function EmptyState({ icon, title, body, action }) {
   return (
     <div style={{ textAlign: 'center', padding: '64px 24px', color: T.muted }}>
@@ -197,8 +234,9 @@ export function EmptyState({ icon, title, body, action }) {
     </div>
   )
 }
+// Hinglish: EmptyState jab data na ho to UI friendly message show karta.
 
-// ─── Notification toast ───────────────────────────────────────────────────────
+// ─── Notification toast — list of toasts anchored bottom-right
 export function NotificationToast({ notifications, onDismiss }) {
   const colorMap = { success: T.profit, info: T.accent, profit: T.profit, loss: T.loss, warn: T.warning }
   return (
@@ -226,15 +264,17 @@ export function NotificationToast({ notifications, onDismiss }) {
     </div>
   )
 }
+// Hinglish: NotificationToast bottom-right anchored list of notifications — onDismiss handler se remove hota.
 
-// ─── Loading spinner ──────────────────────────────────────────────────────────
+// ─── Loading spinner — small CSS spinner
 export function Spinner({ size = 20, color = T.accent }) {
   return (
     <div style={{ width: size, height: size, border: `2px solid ${color}30`, borderTopColor: color, borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
   )
 }
+// Hinglish: Spinner chhota visual loader — CSS animation se ghoomta.
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+// ─── Modal — overlay modal using framer-motion for enter/exit
 export function Modal({ open, onClose, title, children, width = 440 }) {
   if (!open) return null
   return (
@@ -263,8 +303,9 @@ export function Modal({ open, onClose, title, children, width = 440 }) {
     </AnimatePresence>
   )
 }
+// Hinglish: Modal overlay ke click pe close ho jaata (onClose), content ke andar click event stopPropagation karta hai.
 
-// ─── Progress bar ─────────────────────────────────────────────────────────────
+// ─── Progress bar — visual progress indicator
 export function ProgressBar({ value, max = 100, color = T.accent, height = 6 }) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100))
   return (
@@ -276,8 +317,9 @@ export function ProgressBar({ value, max = 100, color = T.accent, height = 6 }) 
     </div>
   )
 }
+// Hinglish: ProgressBar percentage calculate karke animated div fill karta.
 
-// ─── Divider ──────────────────────────────────────────────────────────────────
+// ─── Divider — simple horizontal rule with optional label
 export function Divider({ label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
@@ -287,3 +329,4 @@ export function Divider({ label }) {
     </div>
   )
 }
+// Hinglish: Divider visual separator hai — optional label ke sath.

@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/SettingsPage.jsx
+
+Purpose:
+Settings page exposes preferences and workspace tools (import/export/reset).
+
+Is file mein:
+1. Workspace export/import controls
+2. Precision and fee settings
+
+Viva Explanation:
+Settings allow changing persistent workspace options stored via Zustand persist.
+=================================================
+*/
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
@@ -16,6 +31,8 @@ function Section({ title, children }) {
     </motion.div>
   )
 }
+
+// Hinglish: Section wrapper UI ka reusable block hai — motion animation laga ke simple visual grouping.
 
 function SettingRow({ label, sub, control }) {
   return (
@@ -59,12 +76,16 @@ export default function SettingsPage() {
     e.target.value = ''
   }
 
+  // Hinglish: handleImport JSON file ko read karke importWorkspace call karega; invalid JSON per notification milega.
+
   const storageSize = useMemo_(() => {
     try {
       const raw = localStorage.getItem('arbmatrix-v3') || ''
       return (new Blob([raw]).size / 1024).toFixed(1)
     } catch { return '?' }
   })
+
+  // Hinglish: storageSize localStorage ka approximate size nikalta — helpful for 'About' stats.
 
   const stats = {
     units:   units.length,

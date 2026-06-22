@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/ArbitragePage.jsx
+
+Purpose:
+Arbitrage page detected loops aur opportunities list karta hai.
+
+Is file mein:
+1. computeArbitrageOpportunities se data render hota hai
+2. Each loop ki details aur actions (simulate/run) hoti hain
+
+Viva Explanation:
+Ye page algorithm output ko user-friendly view mein show karta hai.
+=================================================
+*/
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
@@ -26,12 +41,14 @@ function FrictionPanel({ fees, setFees }) {
               }}
               placeholder={placeholder}
             />
+            {/* Hinglish: Fees input ko parseFloat se sanitize kiya ja raha hai, agar invalid input to 0 set ho jayega */}
           </div>
         ))}
       </div>
       <div style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 13px', background: `${T.warning}12`, border: `1px solid ${T.warning}28`, borderRadius: 9, fontSize: 11.5, color: T.muted }}>
         Total friction / swap
         <span style={{ color: T.warning, fontFamily: 'JetBrains Mono', fontWeight: 700 }}>{(fees.pct + fees.slippage).toFixed(2)}% + ${fees.flat} flat</span>
+        {/* Hinglish: Yahan total friction show kar rahe — UI read-only display. Agar formula change karo to sim results farak padega. */}
       </div>
     </Card>
   )
@@ -45,6 +62,7 @@ function MiniStat({ label, value, color }) {
     </div>
   )
 }
+// Hinglish: MiniStat chhote stat box banata — simple presentational component.
 
 function OpportunityCard({ opp, index, onViewLoop, onSimulate }) {
   const statusColor = opp.netProfit > 1 ? T.profit : opp.netProfit > 0 ? T.warning : T.loss
@@ -81,6 +99,7 @@ function OpportunityCard({ opp, index, onViewLoop, onSimulate }) {
               </span>
             ))}
           </div>
+          {/* Hinglish: Path dikh raha — step-by-step swap sequence. Arrow visual sirf UX ke liye hai. */}
 
           {/* Metrics */}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -111,6 +130,7 @@ function OpportunityCard({ opp, index, onViewLoop, onSimulate }) {
               {opp.netProfit > 0 ? '+' : ''}{opp.netProfit.toFixed(4)}%
             </span>
           </div>
+          {/* Hinglish: Net profit dikhaya — positive/negative color se easily samajh sakein. */}
           <div style={{ display: 'flex', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
             <Button variant="ghost" size="sm" onClick={() => onViewLoop(opp)}>View Loop</Button>
             <Button variant="success" size="sm" onClick={() => onSimulate(opp)}>Simulate</Button>
@@ -130,12 +150,14 @@ function CountPill({ color, value, label }) {
     </span>
   )
 }
+// Hinglish: CountPill ek chhota pill style badge hai, summary counts ke liye use hota.
 
 export default function ArbitragePage() {
   const { units, rates, fees, setFees, setSelectedLoop, setPage } = useAppStore()
   const [sort, setSort] = useState('profit')
 
   const opportunities = useMemo(() => computeArbitrageOpportunities(units, rates, fees), [units, rates, fees])
+  // Hinglish: Opportunities compute karne ke baad is array ko sorted/filtered karenge display ke liye.
 
   const sorted = useMemo(() => {
     const arr = [...opportunities]
@@ -147,6 +169,8 @@ export default function ArbitragePage() {
 
   const viewLoop = (opp) => { setSelectedLoop(opp); setPage('loop') }
   const simulate = (opp) => { setSelectedLoop(opp); setPage('simulator') }
+
+  // Hinglish: viewLoop aur simulate state change karte — ye navigation ki tarah kaam karta hai (page switch via store).
 
   return (
     <div style={{ padding: 24 }}>

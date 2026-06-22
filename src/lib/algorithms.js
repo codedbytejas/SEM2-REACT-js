@@ -1,6 +1,20 @@
-// ─── Bellman-Ford Arbitrage Detection ─────────────────────────────────────────
-// Transform rates using -ln(rate) to detect negative cycles = arbitrage
-
+/**
+ * Bellman-Ford based arbitrage detection.
+ *
+ * Transforms rates with -ln(rate) and runs Bellman-Ford to detect negative cycles
+ * which correspond to profitable arbitrage loops. Returns an array of raw cycles
+ * (path + gross multiplier + profit) suitable for downstream simulation.
+ *
+ * Inputs:
+ * - units: string[] - list of unit identifiers (e.g. ['USD','EUR'])
+ * - rates: Record<string, Record<string, number>> - adjacency mapping of rates
+ *
+ * Returns: Array<{ path: string[], grossMultiplier: number, profitPct: number }>
+ *
+ * Edge cases:
+ * - If rates are missing for a pair the edge is ignored.
+ * - Rates <= 0 are ignored.
+ */
 export function bellmanFord(units, rates) {
   const n = units.length
   if (n < 2) return []
@@ -24,6 +38,26 @@ export function bellmanFord(units, rates) {
 
   // Standard Bellman-Ford relaxation
   const dist = Array(n).fill(0)
+/*
+=================================================
+FILE: src/lib/algorithms.js
+
+Purpose:
+Yeh file core algorithmic logic rakhta hai: Bellman-Ford algorithm se arbitrage detect karna,
+fees apply karke net profit estimate karna, matrix build karna aur helper utilities.
+
+Is file mein:
+1. bellmanFord - negative cycle detection using -ln(rate)
+2. computeArbitrageOpportunities - fee simulation + scoring
+3. simulateLoop - stepwise simulation of a single loop
+4. buildMatrix, countActivePaths, fmt, heatColor - helpers
+
+Viva Explanation:
+Bellman-Ford graph algorithm negative cycles detect karta hai. Financial conversion rates ko log transform karte hain taaki multiplicative profits additive ban jayein: -ln(rate).
+Agar negative cycle mile toh uska matlab product of rates > 1 => arbitrage.
+React/Project role: Ye functions UI ke liye data prepare karte hain (ArbitragePage, Dashboard etc.).
+=================================================
+*/
   const prev = Array(n).fill(-1)
 
   for (let i = 0; i < n - 1; i++) {
@@ -32,6 +66,8 @@ export function bellmanFord(units, rates) {
       if (dist[e.u] + e.w < dist[e.v] - 1e-12) {
         dist[e.v] = dist[e.u] + e.w
         prev[e.v] = e.u
+  // Map unit string to index number for building numeric graph
+  // Agar yeh mapping nahi hua toh edges create karne mein problem aayegi
         updated = true
       }
     }
@@ -46,6 +82,8 @@ export function bellmanFord(units, rates) {
     if (dist[e.u] + e.w < dist[e.v] - 1e-12) {
       // Found a node in a negative cycle — trace back
       let node = e.v
+  // Initialize distances and predecessors
+  // Note: Using 0-init works because we only need to detect cycles (relative distances)
       if (visitedStart.has(node)) continue
 
       // Walk back n steps to guarantee we're IN the cycle
@@ -62,16 +100,19 @@ export function bellmanFord(units, rates) {
         if (cyclePath.length > n + 2) break
       }
       cyclePath.push(cyclePath[0]) // close the loop
+  // Detect negative cycles by checking for further relaxations
 
       if (cyclePath.length >= 3) {
         // Validate and compute actual profit
         let product = 1
         let valid = true
         for (let i = 0; i < cyclePath.length - 1; i++) {
+      // Found a node in a negative cycle — trace back to get the cycle nodes
           const r = rates[cyclePath[i]]?.[cyclePath[i + 1]]
           if (!r || r <= 0) { valid = false; break }
           product *= r
         }
+      // Walk back n steps to ensure the node is within the cycle
         if (valid && product > 1.0001) {
           visitedStart.add(e.v)
           cycles.push({
@@ -87,7 +128,21 @@ export function bellmanFord(units, rates) {
   return cycles
 }
 
-// ─── Full arbitrage with fees ─────────────────────────────────────────────────
+/**
+ * Compute arbitrage opportunities with fees applied.
+        // Validate the cycle has valid rates and compute product (gross multiplier)
+ *
+ * This wraps `bellmanFord`, then simulates the effect of fees (flat, pct, slippage)
+ * to compute a net profit estimate, risk score and human-friendly metadata.
+ *
+ * Inputs:
+ * - units: string[]
+ * - rates: Record<string, Record<string, number>>
+ * - fees: { flat: number, pct: number, slippage: number }
+ *
+ * Returns: Array of opportunity objects with fields:
+ * { id, path, steps, grossProfitPct, netProfit, feeImpact, risk, confidence, status, stepDetails }
+ */
 export function computeArbitrageOpportunities(units, rates, fees = { flat: 0, pct: 0, slippage: 0 }) {
   const raw = bellmanFord(units, rates)
 
@@ -140,7 +195,17 @@ export function computeArbitrageOpportunities(units, rates, fees = { flat: 0, pc
     .sort((a, b) => b.netProfit - a.netProfit)
 }
 
-// ─── Simulate compounding on a specific loop ──────────────────────────────────
+/**
+ * Simulate running a specific arbitrage loop with starting capital.
+ *
+ * Inputs:
+ * - loop: { path: string[] }  (path must be closed: last element equals first)
+ * - initialAmount: number
+ * - rates: adjacency map
+ * - fees: { flat, pct, slippage }
+ *
+ * Returns: { steps: Array, finalCapital, netProfit, roi, initialAmount }
+ */
 export function simulateLoop(loop, initialAmount, rates, fees) {
   let capital = initialAmount
   const steps = []
@@ -169,7 +234,10 @@ export function simulateLoop(loop, initialAmount, rates, fees) {
   return { steps, finalCapital: capital, netProfit, roi, initialAmount }
 }
 
-// ─── Build adjacency matrix ───────────────────────────────────────────────────
+/**
+ * Build adjacency matrix for display in the matrix page.
+ * Returns a 2D array matching units order where each cell is { type, value }.
+ */
 export function buildMatrix(units, rates) {
   return units.map(from =>
     units.map(to => {
@@ -180,7 +248,9 @@ export function buildMatrix(units, rates) {
   )
 }
 
-// ─── Count active paths ───────────────────────────────────────────────────────
+/**
+ * Count the number of directed active paths (non-self and with a valid rate).
+ */
 export function countActivePaths(units, rates) {
   let count = 0
   for (const f of units)
@@ -189,7 +259,9 @@ export function countActivePaths(units, rates) {
   return count
 }
 
-// ─── Format number with precision ────────────────────────────────────────────
+/**
+ * Format a numeric value for display using a reasonable precision and suffixes.
+ */
 export function fmt(value, precision = 5) {
   if (value === null || value === undefined) return '—'
   if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(2) + 'M'
@@ -197,7 +269,9 @@ export function fmt(value, precision = 5) {
   return value.toFixed(precision)
 }
 
-// ─── Heatmap color ────────────────────────────────────────────────────────────
+/**
+ * Return a rgba color string for a heatmap cell between min and max.
+ */
 export function heatColor(value, min, max) {
   if (value === null) return 'transparent'
   const t = max === min ? 0.5 : (value - min) / (max - min)

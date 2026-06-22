@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/MatrixPage.jsx
+
+Purpose:
+Matrix page shows the adjacency matrix of rates and allows editing.
+
+Is file mein:
+1. buildMatrix helper use hota hai
+2. Editable cells to set rates
+
+Viva Explanation:
+Matrix view directly maps to the rates data structure used by the algorithm.
+=================================================
+*/
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
@@ -35,6 +50,8 @@ export default function MatrixPage() {
     setTimeout(() => setFlash(p => { const n = { ...p }; delete n[k]; return n }), 700)
   }, [])
 
+  // Hinglish: flash function temporari visual effect dega jab rate update hota — green/red highlight.
+
   const commitEdit = useCallback((from, to, raw) => {
     const num = parseFloat(raw)
     if (!isNaN(num) && num > 0 && from !== to) {
@@ -45,12 +62,16 @@ export default function MatrixPage() {
     setEditCell(null)
   }, [rates, setRate, flash])
 
+  // Hinglish: commitEdit validates input and updates store via setRate. Arrow-key navigation bhi yahin handle hoti.
+
   const startEdit = (from, to) => {
     if (from === to) return
     setEditCell({ from, to })
     setEditVal(rates[from]?.[to]?.toString() || '')
     setTimeout(() => inputRef.current?.focus(), 30)
   }
+
+  // Hinglish: startEdit editing mode enter karata aur input ko focus karta.
 
   const handleKeyDown = (e, from, to) => {
     if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); commitEdit(from, to, editVal) }

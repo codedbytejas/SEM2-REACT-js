@@ -1,3 +1,18 @@
+/*
+=================================================
+FILE: src/pages/CustomUnitsPage.jsx
+
+Purpose:
+Custom Units page allows user to manage units (add/remove/update metadata).
+
+Is file mein:
+1. Forms to add new units
+2. List of units with edit/delete actions
+
+Viva Explanation:
+User can create their own units and presets. Store actions used heavily here.
+=================================================
+*/
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
@@ -57,6 +72,7 @@ function UnitCard({ unit, meta, rates, onEdit, onRemove }) {
     </motion.div>
   )
 }
+// Hinglish: UnitCard ek presentational card hai jo ek unit ka overview dikhata — edit/remove actions pass kiye gaye props se aate.
 
 function QuickRateRow({ units, rates, onSetRate }) {
   const [from, setFrom] = useState(units[0] || '')
@@ -91,6 +107,7 @@ function QuickRateRow({ units, rates, onSetRate }) {
           setRate('')
         }
       }}>Set Rate</Button>
+      {/* Hinglish: QuickRateRow simple helper hai jisse user jaldi se ek conversion rate set kar sakta. */}
     </div>
   )
 }
@@ -110,6 +127,8 @@ export default function CustomUnitsPage() {
     return matchSearch && matchCat
   })
 
+  // Hinglish: filtered array search aur category filter dono apply karke ban raha hai — pure front-end filtering.
+
   const openEdit = (name) => {
     const meta = unitMeta[name] || { icon: '•', color: T.accent, category: 'Custom', description: '' }
     setEditUnit(name)
@@ -123,6 +142,8 @@ export default function CustomUnitsPage() {
   const addPreset = (p) => {
     if (!units.includes(p.name)) updateUnitMeta(p.name, { icon: p.icon, color: p.color, category: p.category, description: '' })
   }
+
+  // Hinglish: addPreset pre-defined presets ko store mein daal deta — duplicate avoid karne ke liye units.includes check hai.
 
   return (
     <div style={{ padding: 24 }}>
